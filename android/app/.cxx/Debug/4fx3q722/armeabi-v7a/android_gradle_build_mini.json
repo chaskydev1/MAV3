@@ -1,0 +1,20 @@
+{
+  "buildFiles": [
+    "/Users/sidhi/Documents/fluttersdk/flutter/packages/flutter_tools/gradle/src/main/groovy/CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "/Users/sidhi/Library/Android/sdk/cmake/3.22.1/bin/ninja",
+      "-C",
+      "/Users/sidhi/Documents/GitHub/GoRide/driver/android/app/.cxx/Debug/4fx3q722/armeabi-v7a",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "/Users/sidhi/Library/Android/sdk/cmake/3.22.1/bin/ninja",
+    "-C",
+    "/Users/sidhi/Documents/GitHub/GoRide/driver/android/app/.cxx/Debug/4fx3q722/armeabi-v7a",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {}
+}

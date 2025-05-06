@@ -1,0 +1,83 @@
+{
+  "project_info": {
+    "project_number": "439845573858",
+    "firebase_url": "https://mav2025-bd18e-default-rtdb.firebaseio.com",
+    "project_id": "mav2025-bd18e",
+    "storage_bucket": "mav2025-bd18e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:439845573858:android:67e476c0807188d3e33abb",
+        "android_client_info": {
+          "package_name": "drive.mav.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "439845573858-mqkds2oa8u4mos372edh5igijgo0cjkl.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDl4WDw1SnIgnWkVLwVxrtqYBhzMu8VgvY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "439845573858-mqkds2oa8u4mos372edh5igijgo0cjkl.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "439845573858-73vuq9kv68lhtomkrjvjgdskfb8efjau.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.goride.customer"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:439845573858:android:67e476c0807188d3e33abb",
+        "android_client_info": {
+          "package_name": "drive.mav.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "439845573858-mqkds2oa8u4mos372edh5igijgo0cjkl.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDl4WDw1SnIgnWkVLwVxrtqYBhzMu8VgvY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "439845573858-mqkds2oa8u4mos372edh5igijgo0cjkl.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "439845573858-73vuq9kv68lhtomkrjvjgdskfb8efjau.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.goride.customer"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

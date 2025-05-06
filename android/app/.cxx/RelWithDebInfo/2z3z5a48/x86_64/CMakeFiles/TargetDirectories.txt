@@ -1,0 +1,2 @@
+C:/Users/casaf/Downloads/mujeres al volate3/driver/android/app/.cxx/RelWithDebInfo/2z3z5a48/x86_64/CMakeFiles/edit_cache.dir
+C:/Users/casaf/Downloads/mujeres al volate3/driver/android/app/.cxx/RelWithDebInfo/2z3z5a48/x86_64/CMakeFiles/rebuild_cache.dir

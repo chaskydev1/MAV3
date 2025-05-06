@@ -1,0 +1,2 @@
+/Users/sidhi/Documents/GitHub/GoRide/driver/android/app/.cxx/Debug/4fx3q722/x86/CMakeFiles/edit_cache.dir
+/Users/sidhi/Documents/GitHub/GoRide/driver/android/app/.cxx/Debug/4fx3q722/x86/CMakeFiles/rebuild_cache.dir
