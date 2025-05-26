@@ -74,7 +74,7 @@ class IntercityController extends GetxController {
         homeController.selectedIndex.value = 1;
       });
     } else {
-      ShowToastDialog.showToast("You have to minimum ${Constant.amountShow(amount: Constant.minimumDepositToRideAccept)} wallet amount to Accept Order and place a bid".tr);
+      ShowToastDialog.showToast("Debe tener mínimo de ${Constant.amountShow(amount: Constant.minimumDepositToRideAccept)} para aceptar un pedido.".tr);
     }
   }
 

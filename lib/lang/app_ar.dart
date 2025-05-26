@@ -82,7 +82,7 @@ const Map<String, String> arAR = {
   "Customer pickup successfully": "تم التقاط الراكب بنجاح",
   "OTP Invalid": "رمز التحقق غير صالح",
   "Cargo Load successfully": "تم تحميل الشحنة بنجاح",
-  "You have to minimum  wallet amount to Accept Order and place a bid":
+  "You have to minimum  para aceptar un pedido y realizar una oferta.":
       "يجب أن يكون لديك حد أدنى من الرصيد لقبول الطلب وتقديم عرض",
   'New': 'جديد',
   'Accepted': 'مقبول',
@@ -98,7 +98,7 @@ const Map<String, String> arAR = {
   'New Driver Bid': 'عرض جديد من السائق',
   'Driver has offered for your journey.🚗': 'السائق قدم عرضًا لرحلتك.🚗',
   "Ride Accepted": "تم قبول الرحلة",
-  "You have to minimum wallet amount to Accept Order and place a bid":
+  "You have to minimum para aceptar un pedido y realizar una oferta.":
       "يجب أن يكون لديك حد أدنى من الرصيد لقبول الطلب وتقديم عرض",
   " For Person": " للشخص",
   "View details": "عرض التفاصيل",

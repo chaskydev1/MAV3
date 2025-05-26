@@ -216,8 +216,8 @@ class OrderMapScreen extends StatelessWidget {
                                               children: [
                                                 InkWell(
                                                   onTap: () {
-                                                    controller.amount.value -= 10;
-                                                    controller.finalAmount.value -= 10;
+                                                    controller.amount.value -= 1;
+                                                    controller.finalAmount.value -= 1;
                                                     controller.enterOfferRateController.value.text =
                                                         controller.amount.value.toStringAsFixed(
                                                             Constant.currencyModel!.decimalDigits!);
@@ -229,7 +229,7 @@ class OrderMapScreen extends StatelessWidget {
                                                     ),
                                                     child: Padding(
                                                       padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
-                                                      child: Text("- 10", style: GoogleFonts.poppins()),
+                                                      child: Text("- 1", style: GoogleFonts.poppins()),
                                                     ),
                                                   ),
                                                 ),
@@ -243,11 +243,11 @@ class OrderMapScreen extends StatelessWidget {
                                                 const SizedBox(width: 20),
                                                 ButtonThem.roundButton(
                                                   context,
-                                                  title: "+ 10",
+                                                  title: "+ 1",
                                                   btnWidthRatio: 0.22,
                                                   onPress: () {
-                                                    controller.amount.value += 10;
-                                                    controller.finalAmount.value += 10;
+                                                    controller.amount.value += 1;
+                                                    controller.finalAmount.value += 1;
                                                     controller.enterOfferRateController.value.text =
                                                         controller.amount.value.toStringAsFixed(
                                                             Constant.currencyModel!.decimalDigits!);
@@ -285,7 +285,7 @@ class OrderMapScreen extends StatelessWidget {
                                         ),
                                         const SizedBox(height: 20),
                                         Text(
-                                          '${'Tiempo aprox'.tr}: ${controller.convertToMinutes(controller.orderModel.value.duration.toString())} ${'Min.'.tr}',
+                                          '${'Tiempo aprox'.tr}: ${controller.orderModel.value.duration ?? '0'} ${'Min.'.tr}',
                                           style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
                                         ),
                                         /*

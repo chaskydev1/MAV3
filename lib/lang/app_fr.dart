@@ -87,7 +87,7 @@ const Map<String, String> trFr = {
   "Customer pickup successfully": "Prise en charge du client avec succès",
   "OTP Invalid": "OTP invalide",
   "Cargo Load successfully": "Chargement réussi",
-  "You have to minimum  wallet amount to Accept Order and place a bid":
+  "You have to minimum  para aceptar un pedido y realizar una oferta.":
       "Vous devez atteindre le montant minimum du portefeuille pour accepter la commande et placer une enchère.",
   'New': 'Nouveau',
   'Accepted': 'Accepté',
@@ -104,7 +104,7 @@ const Map<String, String> trFr = {
   'Driver has offered for your journey.🚗':
       'Un chauffeur vous a proposé pour votre trajet.🚗',
   "Ride Accepted": "Ride Accepted",
-  "You have to minimum wallet amount to Accept Order and place a bid":
+  "You have to minimum para aceptar un pedido y realizar una oferta.":
       "Vous devez atteindre le montant minimum du portefeuille pour accepter la commande et placer une enchère.",
   " For Person": " For Person",
   "View details": "Afficher les détails",

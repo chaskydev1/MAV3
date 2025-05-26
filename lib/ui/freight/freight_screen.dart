@@ -36,7 +36,7 @@ class FreightScreen extends StatelessWidget {
                               width: Responsive.width(100, context),
                               child: Padding(
                                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                                child: Text("You have to minimum ${Constant.amountShow(amount: Constant.minimumDepositToRideAccept.toString())} wallet amount to Accept Order and place a bid".tr,
+                                child: Text("Debe tener mínimo de ${Constant.amountShow(amount: Constant.minimumDepositToRideAccept.toString())} para aceptar un pedido.".tr,
                                     style: GoogleFonts.poppins(color: Colors.white)),
                               ),
                             ),

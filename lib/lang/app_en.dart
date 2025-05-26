@@ -83,8 +83,8 @@ const Map<String, String> enUS = {
   "Customer pickup successfully": "Customer pickup successfully",
   "OTP Invalid": "OTP Invalid",
   "Cargo Load successfully": "Cargo Load successfully",
-  "You have to minimum  wallet amount to Accept Order and place a bid":
-      "You have to minimum  wallet amount to Accept Order and place a bid",
+  "You have to minimum  para aceptar un pedido y realizar una oferta.":
+      "You have to minimum  para aceptar un pedido y realizar una oferta.",
   'New': 'New',
   'Accepted': 'Accepted',
   'Active': 'Active',
@@ -100,8 +100,8 @@ const Map<String, String> enUS = {
   'Driver has offered for your journey.🚗':
       'Driver has offered for your journey.🚗',
   "Ride Accepted": "Ride Accepted",
-  "You have to minimum wallet amount to Accept Order and place a bid":
-      "You have to minimum wallet amount to Accept Order and place a bid",
+  "You have to minimum para aceptar un pedido y realizar una oferta.":
+      "You have to minimum para aceptar un pedido y realizar una oferta.",
   " For Person": " For Person",
   "View details": "View details",
   "No active ride found": "No active ride found",

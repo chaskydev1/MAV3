@@ -233,7 +233,7 @@ const Map<String, String> esES = {
   'Completed': 'Completados',
   'Online': 'En línea',
   'Offline': 'Desconectado',
-  'You have to minimum \$ 50.00 wallet amount to Accept Order and place a bid': 'Recargue crédito para trabajar, minimo Bs.-20',
+  'You have to minimum \$ 50.00 para aceptar un pedido y realizar una oferta.': 'Recargue crédito para trabajar, minimo Bs.-20',
   'You are Now offline so you can\'t get nearest order.': 'Estás desconectado, por lo tanto, no puedes recibir pedidos cercanos',
   'Freight': 'Carga',
   'Bank Details': 'Detalles bancarios',
