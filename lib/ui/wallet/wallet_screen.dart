@@ -61,13 +61,15 @@ class WalletScreen extends StatelessWidget {
                                     Padding(
                                       padding: const EdgeInsets.only(top: 8),
                                       child: Text(
-                                      "Total Balance".tr,
+                                      "Saldo Total".tr,
                                         style: GoogleFonts.poppins(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 18),
                                     ),
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
-                                      "Bs.- ${controller.driverUserModel.value.walletAmount.toString()}",
+                                      "Bs. ${(controller.driverUserModel.value.walletAmount is double ? 
+                                              (controller.driverUserModel.value.walletAmount as double).toStringAsFixed(2) : 
+                                              double.tryParse(controller.driverUserModel.value.walletAmount.toString())?.toStringAsFixed(2) ?? '0.00')}",
                                       style: GoogleFonts.poppins(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 28),
                                     ),
                                   ],
@@ -182,6 +184,25 @@ class WalletScreen extends StatelessWidget {
                                                             walletTransactionModel.note.toString(),
                                                             style: GoogleFonts.poppins(fontWeight: FontWeight.w400),
                                                           ),
+                                                          if (walletTransactionModel.orderType == "city" || walletTransactionModel.orderType == "intercity")
+                                                            FutureBuilder(
+                                                              future: walletTransactionModel.orderType == "city" 
+                                                                ? FireStoreUtils.getOrder(walletTransactionModel.transactionId.toString())
+                                                                : FireStoreUtils.getInterCityOrder(walletTransactionModel.transactionId.toString()),
+                                                              builder: (context, AsyncSnapshot snapshot) {
+                                                                if (snapshot.hasData) {
+                                                                  final order = snapshot.data;
+                                                                  return Text(
+                                                                    "Precio del viaje: ${Constant.amountShow(amount: order.finalRate.toString())}",
+                                                                    style: GoogleFonts.poppins(
+                                                                      fontWeight: FontWeight.w500,
+                                                                      color: AppColors.primary,
+                                                                    ),
+                                                                  );
+                                                                }
+                                                                return const SizedBox.shrink();
+                                                              },
+                                                            ),
                                                         ],
                                                       ),
                                                     ),

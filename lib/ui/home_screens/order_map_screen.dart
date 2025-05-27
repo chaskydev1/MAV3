@@ -216,11 +216,10 @@ class OrderMapScreen extends StatelessWidget {
                                               children: [
                                                 InkWell(
                                                   onTap: () {
-                                                    controller.amount.value -= 1;
-                                                    controller.finalAmount.value -= 1;
+                                                    controller.amount.value = (controller.amount.value - 1).toDouble();
+                                                    controller.finalAmount.value = (controller.finalAmount.value - 1).toDouble();
                                                     controller.enterOfferRateController.value.text =
-                                                        controller.amount.value.toStringAsFixed(
-                                                            Constant.currencyModel!.decimalDigits!);
+                                                        controller.amount.value.toStringAsFixed(2);
                                                   },
                                                   child: Container(
                                                     decoration: BoxDecoration(
@@ -246,11 +245,10 @@ class OrderMapScreen extends StatelessWidget {
                                                   title: "+ 1",
                                                   btnWidthRatio: 0.22,
                                                   onPress: () {
-                                                    controller.amount.value += 1;
-                                                    controller.finalAmount.value += 1;
+                                                    controller.amount.value = (controller.amount.value + 1).toDouble();
+                                                    controller.finalAmount.value = (controller.finalAmount.value + 1).toDouble();
                                                     controller.enterOfferRateController.value.text =
-                                                        controller.amount.value.toStringAsFixed(
-                                                            Constant.currencyModel!.decimalDigits!);
+                                                        controller.amount.value.toStringAsFixed(2);
                                                   },
                                                 ),
                                               ],

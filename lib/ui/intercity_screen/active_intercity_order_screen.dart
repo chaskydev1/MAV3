@@ -333,7 +333,7 @@ class ActiveIntercityOrderScreen extends StatelessWidget {
             const SizedBox(
               height: 10,
             ),
-            Text("OTP verify from customer".tr, style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
+            Text("Verificar codigo del cliente".tr, style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
             Padding(
               padding: const EdgeInsets.only(top: 20),
               child: PinCodeTextField(

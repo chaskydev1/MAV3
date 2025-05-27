@@ -26,7 +26,7 @@ class CompleteOrderScreen extends StatelessWidget {
           return Scaffold(
               appBar: AppBar(
                 backgroundColor: AppColors.primary,
-                title: Text("Ride Details".tr),
+                title: Text("Detalles del Viaje".tr),
                 leading: InkWell(
                     onTap: () {
                       Get.back();

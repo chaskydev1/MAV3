@@ -1,0 +1,2 @@
+C:/Users/casaf/Downloads/driver 4/MAV3/android/app/.cxx/RelWithDebInfo/132o2040/arm64-v8a/CMakeFiles/edit_cache.dir
+C:/Users/casaf/Downloads/driver 4/MAV3/android/app/.cxx/RelWithDebInfo/132o2040/arm64-v8a/CMakeFiles/rebuild_cache.dir

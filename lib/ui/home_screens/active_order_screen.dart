@@ -21,6 +21,8 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'dart:io' show Platform;
 
 class ActiveOrderScreen extends StatelessWidget {
   const ActiveOrderScreen({Key? key}) : super(key: key);
@@ -127,53 +129,132 @@ class ActiveOrderScreen extends StatelessWidget {
                                     ),
                                     Row(
                                       children: [
-                                        Expanded(
-                                          child: orderModel.status == Constant.rideInProgress
-                                              ? ButtonThem.buildBorderButton(
+                                    Expanded(
+                                      child: orderModel.status == Constant.rideInProgress
+                                          ? ButtonThem.buildBorderButton(
+                                              context,
+                                              title: "💵COBRAR VIAJE💸".tr,
+                                              btnHeight: 44,
+                                              iconVisibility: false,
+                                              onPress: () async {
+                                                // Mostrar diálogo de confirmación
+                                                bool? confirm = await showDialog<bool>(
+                                                  context: context,
+                                                  builder: (BuildContext context) {
+                                                    // Ventana modal de confirmación
+                                                    return AlertDialog(
+                                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                                                      backgroundColor: Colors.white,
+                                                      title: Row(
+                                                        children: [
+                                                          Icon(Icons.info_outline, color: Colors.blueAccent),
+                                                          const SizedBox(width: 10),
+                                                          Text(
+                                                            "Confirmación".tr,
+                                                            style: GoogleFonts.poppins(
+                                                              fontWeight: FontWeight.w600,
+                                                              fontSize: 20,
+                                                              color: Colors.black87,
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                      content: Text(
+                                                        "¿El pasajero ya llegó a su destino?".tr,
+                                                        style: GoogleFonts.poppins(
+                                                          fontSize: 16,
+                                                          color: Colors.black54,
+                                                        ),
+                                                      ),
+                                                      actionsPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                                                      actions: [
+                                                        TextButton(
+                                                          style: TextButton.styleFrom(
+                                                            backgroundColor: Colors.grey.shade200,
+                                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                                                          ),
+                                                          onPressed: () {
+                                                            Navigator.of(context).pop(false); // No
+                                                          },
+                                                          child: Text(
+                                                            "No".tr,
+                                                            style: GoogleFonts.poppins(
+                                                              fontWeight: FontWeight.w600,
+                                                              color: Colors.grey.shade800,
+                                                              fontSize: 16,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        ElevatedButton(
+                                                          style: ElevatedButton.styleFrom(
+                                                            backgroundColor: Colors.blueAccent,
+                                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                                            padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 12),
+                                                          ),
+                                                          onPressed: () {
+                                                            Navigator.of(context).pop(true); // Sí
+                                                          },
+                                                          child: Text(
+                                                            "Sí".tr,
+                                                            style: GoogleFonts.poppins(
+                                                              fontWeight: FontWeight.w700,
+                                                              fontSize: 16,
+                                                              color: Colors.white,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    );
+                                                    // Ventana modal de confirmación
+                                                  },
+                                                );
+
+                                                if (confirm == true) {
+                                                  // El usuario confirmó, ejecutamos la lógica de completar viaje
+                                                  orderModel.status = Constant.rideComplete;
+
+                                                  await FireStoreUtils.getCustomer(orderModel.userId.toString()).then((value) async {
+                                                    if (value != null && value.fcmToken != null) {
+                                                      Map<String, dynamic> playLoad = <String, dynamic>{
+                                                        "type": "city_order_complete",
+                                                        "orderId": orderModel.id,
+                                                      };
+
+                                                      await SendNotification.sendOneNotification(
+                                                        token: value.fcmToken.toString(),
+                                                        title: 'Ride complete!'.tr,
+                                                        body: 'Please complete your payment.'.tr,
+                                                        payload: playLoad,
+                                                      );
+                                                    }
+                                                  });
+
+                                                  await FireStoreUtils.setOrder(orderModel).then((value) {
+                                                    if (value == true) {
+                                                      ShowToastDialog.showToast("Viaje completado con éxito.".tr);
+                                                      controller.homeController.selectedIndex.value = 3;
+                                                    }
+                                                  });
+                                                }
+                                                // Si confirm es false o null, no hacemos nada y el diálogo se cierra
+                                              },
+                                            )
+                                          : orderModel.status == Constant.rideHold || orderModel.status == Constant.rideHoldAccepted
+                                              ? SizedBox.shrink()
+                                              : ButtonThem.buildBorderButton(
                                                   context,
-                                                  title: "Complete Ride".tr,
+                                                  title: "CODIGO DEL PASAJERO".tr,
                                                   btnHeight: 44,
                                                   iconVisibility: false,
                                                   onPress: () async {
-                                                    orderModel.status = Constant.rideComplete;
-
-                                                    await FireStoreUtils.getCustomer(orderModel.userId.toString()).then((value) async {
-                                                      if (value != null) {
-                                                        if (value.fcmToken != null) {
-                                                          Map<String, dynamic> playLoad = <String, dynamic>{"type": "city_order_complete", "orderId": orderModel.id};
-
-                                                          await SendNotification.sendOneNotification(
-                                                              token: value.fcmToken.toString(),
-                                                              title: 'Ride complete!'.tr,
-                                                              body: 'Please complete your payment.'.tr,
-                                                              payload: playLoad);
-                                                        }
-                                                      }
-                                                    });
-
-                                                    await FireStoreUtils.setOrder(orderModel).then((value) {
-                                                      if (value == true) {
-                                                        ShowToastDialog.showToast("Viaje completado con exito.".tr);
-                                                        controller.homeController.selectedIndex.value = 3;
-                                                      }
-                                                    });
+                                                    showDialog(
+                                                      context: context,
+                                                      builder: (BuildContext context) => otpDialog(context, controller, orderModel),
+                                                    );
                                                   },
-                                                )
-                                              : orderModel.status == Constant.rideHold || orderModel.status == Constant.rideHoldAccepted
-                                                  ? SizedBox.shrink()
-                                                  : ButtonThem.buildBorderButton(
-                                                      context,
-                                                      title: "Pickup Customer".tr,
-                                                      btnHeight: 44,
-                                                      iconVisibility: false,
-                                                      onPress: () async {
-                                                        showDialog(
-                                                          context: context, 
-                                                          builder: (BuildContext context) => otpDialog(context, controller, orderModel)
-                                                        );
-                                                      },
-                                                    ),
-                                        ),
+                                                ),
+                                    ),
                                         const SizedBox(
                                           width: 10,
                                         ),
@@ -218,14 +299,71 @@ class ActiveOrderScreen extends StatelessWidget {
                                                     color: themeChange.getThem() ? AppColors.darkModePrimary : AppColors.primary, borderRadius: BorderRadius.circular(5)),
                                                 child: Icon(Icons.call, color: themeChange.getThem() ? Colors.black : Colors.white),
                                               ),
-                                            )
+                                            ),
                                           ],
                                         ),
                                       ],
                                     ),
-                                    const SizedBox(
-                                      height: 20,
-                                    ),
+                                    const SizedBox(height: 10),
+                                    (orderModel.status == Constant.rideHold || orderModel.status == Constant.rideHoldAccepted)
+                                        ? const SizedBox.shrink()
+                                        : orderModel.status == Constant.rideActive
+                                            ? ButtonThem.buildButton(
+                                                context,
+                                                title: "Iniciar viaje",
+                                                btnHeight: 45,
+                                                // Te lleva a Google Maps para iniciar la navegación al punto de recogida
+                                                onPress: () async {
+                                                  final lat = orderModel.sourceLocationLAtLng!.latitude;
+                                                  final lng = orderModel.sourceLocationLAtLng!.longitude;
+
+                                                  String url;
+
+                                                  if (Platform.isAndroid) {
+                                                    // Android: iniciar navegación directamente
+                                                    url = 'google.navigation:q=$lat,$lng&mode=d';
+                                                  } else {
+                                                    // iOS: solo abre Google Maps con la ruta (no inicia automáticamente)
+                                                    url = 'https://www.google.com/maps/dir/?api=1&destination=$lat,$lng&travelmode=driving';
+                                                  }
+
+                                                  if (await canLaunch(url)) {
+                                                    await launch(url);
+                                                  } else {
+                                                    ShowToastDialog.showToast("No se pudo abrir Google Maps".tr);
+                                                  }
+                                                },
+                                              )
+                                            : orderModel.status == Constant.rideInProgress
+                                                ? ButtonThem.buildButton(
+                                                    context,
+                                                    title: "Llevar al pasajero",
+                                                    btnHeight: 45,
+                                                    // Te lleva a Google Maps para iniciar la navegación al destino
+                                                    onPress: () async {
+                                                      print("Botón 'Llevar al pasajero' presionado");
+                                                      final lat = orderModel.destinationLocationLAtLng!.latitude;
+                                                      final lng = orderModel.destinationLocationLAtLng!.longitude;
+
+                                                      String url;
+
+                                                      if (Platform.isAndroid) {
+                                                        url = 'google.navigation:q=$lat,$lng&mode=d';
+                                                      } else {
+                                                        // iOS fallback: abrir Maps con destino
+                                                        url = 'https://www.google.com/maps/dir/?api=1&destination=$lat,$lng&travelmode=driving';
+                                                      }
+
+                                                      if (await canLaunch(url)) {
+                                                        await launch(url);
+                                                      } else {
+                                                        ShowToastDialog.showToast("No se pudo abrir Google Maps".tr);
+                                                      }
+                                                    }
+
+                                                  )
+                                                : const SizedBox.shrink(),
+                                    const SizedBox(height: 5),
                                     orderModel.status.toString() == Constant.rideHold
                                         ? Align(
                                             alignment: Alignment.topLeft,
@@ -359,7 +497,7 @@ class ActiveOrderScreen extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
               const SizedBox(height: 10),
-              Text("OTP verify from customer".tr, 
+              Text("Verificar codigo del cliente".tr, 
                   style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
             Padding(
               padding: const EdgeInsets.only(top: 20),
@@ -401,7 +539,7 @@ class ActiveOrderScreen extends StatelessWidget {
               const SizedBox(height: 10),
               ButtonThem.buildButton(
                 context, 
-                title: "Verificar OTP".tr, 
+                title: "Verificar codigo".tr, 
                 onPress: () async {
               if (orderModel.otp.toString() == controller.otpController.value.text) {
                 Get.back();
