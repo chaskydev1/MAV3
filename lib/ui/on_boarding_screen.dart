@@ -8,6 +8,7 @@ import 'package:driver/utils/Preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'dart:ui';
 
 class OnBoardingScreen extends StatelessWidget {
   const OnBoardingScreen({Key? key}) : super(key: key);
@@ -28,6 +29,24 @@ class OnBoardingScreen extends StatelessWidget {
                         : controller.selectedPageIndex.value == 1
                             ? Image.asset("assets/images/onboarding_2.png", width: double.infinity, height: double.infinity, fit: BoxFit.cover)
                             : Image.asset("assets/images/onboarding_3.png", width: double.infinity, height: double.infinity, fit: BoxFit.cover),
+                    // Capa negra encima para oscurecer el fondo
+                    Positioned.fill(
+                      child: Stack(
+                        children: [
+                          // Oscurecer
+                          Container(
+                            color: Colors.black.withOpacity(0.3),
+                          ),
+                          // Difuminar
+                          BackdropFilter(
+                            filter: ImageFilter.blur(sigmaX: 4.0, sigmaY: 4.0),
+                            child: Container(
+                              color: Colors.transparent,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                     Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
@@ -67,7 +86,15 @@ class OnBoardingScreen extends StatelessWidget {
                                         children: [
                                           Text(
                                             Constant.localizationTitle(controller.onBoardingList[index].title),
-                                            style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w600, letterSpacing: 1.5),
+                                            style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w600, letterSpacing: 1.5, color: Colors.white,
+                                              shadows: [
+                                                Shadow(
+                                                  offset: Offset(1.0, 1.0),
+                                                  blurRadius: 6.0,
+                                                  color: Colors.black,
+                                                ),
+                                              ],
+                                            ),
                                           ),
                                           const SizedBox(
                                             height: 10,
@@ -77,7 +104,15 @@ class OnBoardingScreen extends StatelessWidget {
                                             child: Text(
                                               Constant.localizationDescription(controller.onBoardingList[index].description),
                                               textAlign: TextAlign.center,
-                                              style: GoogleFonts.poppins(fontWeight: FontWeight.w400, letterSpacing: 1.5),
+                                              style: GoogleFonts.poppins(fontWeight: FontWeight.w500, letterSpacing: 1, color: Colors.white,
+                                                shadows: [
+                                                  Shadow(
+                                                    offset: Offset(1.0, 1.0),
+                                                    blurRadius: 6.0,
+                                                    color: Colors.black,
+                                                  ),
+                                                ],
+                                              ),
                                             ),
                                           ),
                                         ],
@@ -90,13 +125,21 @@ class OnBoardingScreen extends StatelessWidget {
                         Expanded(
                             child: Column(
                           children: [
-                            controller.selectedPageIndex.value == 2 ?SizedBox():InkWell(
+                            controller.selectedPageIndex.value == 3 ?SizedBox():InkWell(
                                 onTap: () {
-                                  controller.pageController.jumpToPage(2);
+                                  controller.pageController.jumpToPage(3);
                                 },
                                 child: Text(
-                                  'skip'.tr,
-                                  style: const TextStyle(fontSize: 16, letterSpacing: 1.5, fontWeight: FontWeight.w600),
+                                  'Saltar'.tr,
+                                  style: const TextStyle(fontSize: 16, letterSpacing: 1.5, fontWeight: FontWeight.w600, color: Colors.white,
+                                    shadows: [
+                                      Shadow(
+                                        offset: Offset(1.0, 1.0),
+                                        blurRadius: 6.0,
+                                        color: Colors.black,
+                                      ),
+                                    ],
+                                  ),
                                 )),
                             Padding(
                               padding: const EdgeInsets.symmetric(vertical: 30),
@@ -117,7 +160,7 @@ class OnBoardingScreen extends StatelessWidget {
                             ),
                             ButtonThem.buildButton(
                               context,
-                              title: controller.selectedPageIndex.value == 2 ? 'Get started'.tr : 'Next'.tr,
+                              title: controller.selectedPageIndex.value == 2 ? 'Comenzar'.tr : 'Siguiente'.tr,
                               btnRadius: 30,
                               onPress: () {
                                 if (controller.selectedPageIndex.value == 2) {

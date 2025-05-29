@@ -269,23 +269,24 @@ class OrderIntercityScreen extends StatelessWidget {
                                                                 }
                                                               }
 
+                                                              // Descontar solo la comisión de administración
                                                               WalletTransactionModel adminCommissionWallet = WalletTransactionModel(
                                                                   id: Constant.getUuid(),
                                                                   amount:
-                                                                      "-${Constant.calculateAdminCommission(amount: (double.parse(orderModel.finalRate.toString()) - double.parse(couponAmount.toString())).toString(), adminCommission: orderModel.adminCommission)}",
+                                                                      "-${Constant.calculateAdminCommission(amount: (double.parse(orderModel.finalRate.toString()) - double.parse(couponAmount.toString())).toString(), adminCommission: Constant.adminCommission)}",
                                                                   createdDate: Timestamp.now(),
                                                                   paymentType: "wallet".tr,
                                                                   transactionId: orderModel.id,
                                                                   orderType: "intercity",
-                                                                  userId: orderModel.driverId.toString(),
                                                                   userType: "driver",
-                                                                  note: "Comisión de administración debitada".tr);
+                                                                  userId: orderModel.driverId.toString(),
+                                                                  note: "Comisión de administración (${Constant.adminCommission?.amount}%)".tr);
 
                                                               await FireStoreUtils.setWalletTransaction(adminCommissionWallet).then((value) async {
                                                                 if (value == true) {
                                                                   await FireStoreUtils.updatedDriverWallet(
                                                                       amount:
-                                                                          "-${Constant.calculateAdminCommission(amount: (double.parse(orderModel.finalRate.toString()) - double.parse(couponAmount.toString())).toString(), adminCommission: orderModel.adminCommission)}");
+                                                                          "-${Constant.calculateAdminCommission(amount: (double.parse(orderModel.finalRate.toString()) - double.parse(couponAmount.toString())).toString(), adminCommission: Constant.adminCommission)}");
                                                                 }
                                                               });
 

@@ -60,6 +60,7 @@ class ActiveFreightOrderScreen extends StatelessWidget {
                           InterCityOrderModel orderModel = InterCityOrderModel.fromJson(snapshot.data!.docs[index].data() as Map<String, dynamic>);
                           return InkWell(
                             onTap: () {
+                              /*
                               if (Constant.mapType == "inappmap") {
                                 if (orderModel.status == Constant.rideActive || orderModel.status == Constant.rideInProgress) {
                                   Get.to(const LiveTrackingScreen(), arguments: {
@@ -73,6 +74,7 @@ class ActiveFreightOrderScreen extends StatelessWidget {
                                     longLatitude: orderModel.destinationLocationLAtLng!.longitude!,
                                     name: orderModel.destinationLocationName.toString());
                               }
+                              */
                             },
                             child: Padding(
                               padding: const EdgeInsets.all(8.0),

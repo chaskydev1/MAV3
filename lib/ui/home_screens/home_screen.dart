@@ -15,96 +15,149 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetX<HomeController>(
-        init: HomeController(),
-        dispose: (state) {
-          FireStoreUtils().closeStream();
-        },
-        builder: (controller) {
-          return Scaffold(
-            backgroundColor: AppColors.whiteA,
-            body: controller.isLoading.value
-                ? Constant.loader(context)
-                : Column(
-                    children: [
-                      (double.tryParse(controller.driverModel.value.walletAmount?.toString() ?? '0.0') ?? 0.0) >= 
-                      (double.tryParse(Constant.minimumDepositToRideAccept?.toString() ?? '0.0') ?? 0.0)
-                          ? SizedBox(
-                              height: Responsive.width(8, context),
-                              width: Responsive.width(100, context),
-                            )
-                          : SizedBox(
-                              height: Responsive.width(18, context),
-                              width: Responsive.width(100, context),
-                              child: Container(
-                                color: Colors.green,
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                                  child: Row(
-                                    children: [
-                                      Expanded(
-                                child: Text(
-                                    "Debe tener mínimo de ${Constant.amountShow(amount: Constant.minimumDepositToRideAccept.toString())} para aceptar un pedido."
-                                        .tr,
-                                    style: GoogleFonts.poppins(color: Colors.white)),
-                                      ),
-                                      ElevatedButton(
-                                        onPressed: () {
-                                          Get.to(() => const RecargarScreen());
-                                        },
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.white,
+      init: HomeController(),
+      dispose: (state) {
+        FireStoreUtils().closeStream();
+      },
+      builder: (controller) {
+        return Stack(
+          children: [
+            Scaffold(
+              backgroundColor: AppColors.whiteA,
+              body: controller.isLoading.value
+                  ? Constant.loader(context)
+                  : Column(
+                      children: [
+                        (double.tryParse(controller.driverModel.value.walletAmount?.toString() ?? '0.0') ?? 0.0) >=
+                                (double.tryParse(Constant.minimumDepositToRideAccept?.toString() ?? '0.0') ?? 0.0)
+                            ? SizedBox(
+                                height: Responsive.width(8, context),
+                                width: Responsive.width(100, context),
+                              )
+                            : SizedBox(
+                                height: Responsive.width(18, context),
+                                width: Responsive.width(100, context),
+                                child: Container(
+                                  color: Colors.green,
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                              "Debe tener mínimo de ${Constant.amountShow(amount: Constant.minimumDepositToRideAccept.toString())} para aceptar un pedido."
+                                                  .tr,
+                                              style: GoogleFonts.poppins(color: Colors.white)),
                                         ),
-                                        child: Text('Recargar'.tr, style: GoogleFonts.poppins(color: Colors.green)),
-                                      ),
-                                    ],
+                                        ElevatedButton(
+                                          onPressed: () {
+                                            Get.to(() => const RecargarScreen());
+                                          },
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Colors.white,
+                                          ),
+                                          child: Text('Recargar'.tr,
+                                              style: GoogleFonts.poppins(color: Colors.green)),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),
+                        Expanded(
+                          child: Container(
+                            height: Responsive.height(100, context),
+                            width: Responsive.width(100, context),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.background,
+                              borderRadius: const BorderRadius.only(
+                                  topLeft: Radius.circular(25), topRight: Radius.circular(25)),
                             ),
-                      Expanded(
-                        child: Container(
-                          height: Responsive.height(100, context),
-                          width: Responsive.width(100, context),
-                          decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.background, borderRadius: const BorderRadius.only(topLeft: Radius.circular(25), topRight: Radius.circular(25))),
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: controller.widgetOptions.elementAt(controller.selectedIndex.value),
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: controller.widgetOptions
+                                  .elementAt(controller.selectedIndex.value),
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-            bottomNavigationBar: BottomNavigationBar(
+                      ],
+                    ),
+              bottomNavigationBar: BottomNavigationBar(
                 items: <BottomNavigationBarItem>[
                   BottomNavigationBarItem(
                     icon: Padding(
                       padding: const EdgeInsets.all(6.0),
-                      child: Image.asset("assets/icons/ic_new.png", width: 18, color: controller.selectedIndex.value == 0 ? AppColors.darkModePrimary : Colors.white),
+                      child: Image.asset(
+                        "assets/icons/ic_new.png",
+                        width: 18,
+                        color: controller.selectedIndex.value == 0
+                            ? AppColors.darkModePrimary
+                            : Colors.white,
+                      ),
                     ),
                     label: 'Nuevos'.tr,
                   ),
                   BottomNavigationBarItem(
                     icon: Padding(
                       padding: const EdgeInsets.all(6.0),
-                      child: Image.asset("assets/icons/ic_accepted.png", width: 18, color: controller.selectedIndex.value == 1 ? AppColors.darkModePrimary : Colors.white),
+                      child: Image.asset(
+                        "assets/icons/ic_accepted.png",
+                        width: 18,
+                        color: controller.selectedIndex.value == 1
+                            ? AppColors.darkModePrimary
+                            : Colors.white,
+                      ),
                     ),
                     label: 'Aceptados'.tr,
                   ),
                   BottomNavigationBarItem(
-                    icon: badges.Badge(
-                      badgeContent: Text(controller.isActiveValue.value.toString()),
-                      child: Padding(
-                        padding: const EdgeInsets.all(6.0),
-                        child: Image.asset("assets/icons/ic_active.png", width: 18, color: controller.selectedIndex.value == 2 ? AppColors.darkModePrimary : Colors.white),
-                      ),
-                    ),
+                    icon: controller.isActiveValue.value > 0
+                        ? badges.Badge(
+                            badgeStyle: const badges.BadgeStyle(
+                              badgeColor: Colors.red,
+                              padding: EdgeInsets.all(6),
+                            ),
+                            badgeContent: Text(
+                              controller.isActiveValue.value.toString(),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 14, // Aumentamos el tamaño
+                                fontWeight: FontWeight.bold, // Le damos negrita
+                              ),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(6.0),
+                              child: Image.asset(
+                                "assets/icons/ic_active.png",
+                                width: 18,
+                                color: controller.selectedIndex.value == 2
+                                    ? AppColors.darkModePrimary
+                                    : Colors.white,
+                              ),
+                            ),
+                          )
+                        : Padding(
+                            padding: const EdgeInsets.all(6.0),
+                            child: Image.asset(
+                              "assets/icons/ic_active.png",
+                              width: 18,
+                              color: controller.selectedIndex.value == 2
+                                  ? AppColors.darkModePrimary
+                                  : Colors.white,
+                            ),
+                          ),
                     label: 'Activos'.tr,
                   ),
                   BottomNavigationBarItem(
                     icon: Padding(
                       padding: const EdgeInsets.all(6.0),
-                      child: Image.asset("assets/icons/ic_completed.png", width: 18, color: controller.selectedIndex.value == 3 ? AppColors.darkModePrimary : Colors.white),
+                      child: Image.asset(
+                        "assets/icons/ic_completed.png",
+                        width: 18,
+                        color: controller.selectedIndex.value == 3
+                            ? AppColors.darkModePrimary
+                            : Colors.white,
+                      ),
                     ),
                     label: 'Completados'.tr,
                   ),
@@ -116,8 +169,37 @@ class HomeScreen extends StatelessWidget {
                 unselectedItemColor: Colors.white,
                 selectedFontSize: 12,
                 unselectedFontSize: 12,
-                onTap: controller.onItemTapped),
-          );
-        });
+                onTap: controller.onItemTapped,
+              ),
+            ),
+
+            // 🔴 Overlay del mensaje "Viaje activo"
+            if (controller.isActiveValue.value > 0)
+              Positioned(
+                bottom: kBottomNavigationBarHeight + 10,
+                left: MediaQuery.of(context).size.width * 0.22,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: Colors.redAccent,
+                    borderRadius: BorderRadius.circular(8),
+                    boxShadow: [
+                      BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 2)),
+                    ],
+                  ),
+                  child: Text(
+                    'Tienes ${controller.isActiveValue.value} ${controller.isActiveValue.value == 1 ? 'viaje activo' : 'viajes activos'}',
+                    style: GoogleFonts.poppins(
+                      color: Colors.white,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        );
+      },
+    );
   }
 }

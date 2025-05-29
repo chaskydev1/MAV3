@@ -124,7 +124,7 @@ class OrderMapScreen extends StatelessWidget {
                                   children: [
                                     Text(
                                       controller.isBoxVisible.value
-                                          ? "Ocultar detalles"
+                                          ? "VER MAPA"
                                           : "Mostrar detalles",
                                       style: GoogleFonts.poppins(
                                         color: Colors.white,

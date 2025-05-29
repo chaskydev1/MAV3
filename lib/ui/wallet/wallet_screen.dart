@@ -173,10 +173,15 @@ class WalletScreen extends StatelessWidget {
                                                                 ),
                                                               ),
                                                               Text(
-                                                                "${Constant.IsNegative(double.parse(walletTransactionModel.amount.toString())) ? "(-" : "+"}${Constant.amountShow(amount: walletTransactionModel.amount.toString().replaceAll("-", ""))}${Constant.IsNegative(double.parse(walletTransactionModel.amount.toString())) ? ")" : ""}",
+                                                                "${Constant.IsNegative(double.parse(walletTransactionModel.amount.toString())) ? "(-" : "+"}"
+                                                                "${(double.parse(walletTransactionModel.amount.toString().replaceAll("-", ""))).toStringAsFixed(2)}"
+                                                                "${Constant.IsNegative(double.parse(walletTransactionModel.amount.toString())) ? ")" : ""}",
                                                                 style: GoogleFonts.poppins(
-                                                                    fontWeight: FontWeight.w600,
-                                                                    color: Constant.IsNegative(double.parse(walletTransactionModel.amount.toString())) ? Colors.red : Colors.green),
+                                                                  fontWeight: FontWeight.w600,
+                                                                  color: Constant.IsNegative(double.parse(walletTransactionModel.amount.toString()))
+                                                                      ? Colors.red
+                                                                      : Colors.green,
+                                                                ),
                                                               ),
                                                             ],
                                                           ),
@@ -192,12 +197,31 @@ class WalletScreen extends StatelessWidget {
                                                               builder: (context, AsyncSnapshot snapshot) {
                                                                 if (snapshot.hasData) {
                                                                   final order = snapshot.data;
-                                                                  return Text(
-                                                                    "Precio del viaje: ${Constant.amountShow(amount: order.finalRate.toString())}",
-                                                                    style: GoogleFonts.poppins(
-                                                                      fontWeight: FontWeight.w500,
-                                                                      color: AppColors.primary,
-                                                                    ),
+                                                                  final finalRate = double.tryParse(order.finalRate.toString()) ?? 0.0;
+                                                                  final commission = finalRate * 0.10;
+
+                                                                  return Column(
+                                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                                    children: [
+                                                                      Text(
+                                                                        "Precio del viaje: Bs. ${NumberFormat("#,##0.00", "es_BO").format(finalRate)}",
+                                                                        style: GoogleFonts.poppins(
+                                                                          fontWeight: FontWeight.w500,
+                                                                          color: AppColors.primary,
+                                                                        ),
+                                                                      ),
+                                                                      /*
+                                                                      const SizedBox(height: 2),
+                                                                      Text(
+                                                                        "10% = Bs. ${NumberFormat("#,##0.00", "es_BO").format(commission)}",
+                                                                        style: GoogleFonts.poppins(
+                                                                          fontWeight: FontWeight.w500,
+                                                                          color: Colors.grey[600],
+                                                                          fontSize: 13,
+                                                                        ),
+                                                                      ),
+                                                                      */
+                                                                    ],
                                                                   );
                                                                 }
                                                                 return const SizedBox.shrink();

@@ -36,6 +36,7 @@ import 'package:driver/widget/geoflutterfire/src/geoflutterfire.dart';
 import 'package:driver/widget/geoflutterfire/src/models/point.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:uuid/uuid.dart';
+import 'package:get/get.dart';
 
 class FireStoreUtils {
   static FirebaseFirestore fireStore = FirebaseFirestore.instance;
@@ -562,15 +563,28 @@ class FireStoreUtils {
 
   static Future<bool?> updatedDriverWallet({required String amount}) async {
     bool isAdded = false;
-    await getDriverProfile(FireStoreUtils.getCurrentUid()).then((value) async {
-      if (value != null) {
-        DriverUserModel userModel = value;
-        userModel.walletAmount = (double.parse(userModel.walletAmount.toString()) + double.parse(amount)).toString();
-        await FireStoreUtils.updateDriverUser(userModel).then((value) {
-          isAdded = value;
-        });
-      }
-    });
+    try {
+      await getDriverProfile(FireStoreUtils.getCurrentUid()).then((value) async {
+        if (value != null) {
+          DriverUserModel userModel = value;
+          double currentAmount = double.parse(userModel.walletAmount.toString());
+          double amountToAdd = double.parse(amount);
+          double newAmount = currentAmount + amountToAdd;
+          
+          // Asegurarse de que el saldo no sea negativo
+          if (newAmount >= 0) {
+            userModel.walletAmount = newAmount.toString();
+            isAdded = await updateDriverUser(userModel);
+          } else {
+            ShowToastDialog.showToast("Saldo insuficiente".tr);
+            isAdded = false;
+          }
+        }
+      });
+    } catch (e) {
+      print("Error updating wallet: $e");
+      isAdded = false;
+    }
     return isAdded;
   }
 

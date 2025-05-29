@@ -67,6 +67,7 @@ class ActiveOrderScreen extends StatelessWidget {
                         OrderModel orderModel = OrderModel.fromJson(snapshot.data!.docs[index].data() as Map<String, dynamic>);
                         return InkWell(
                           onTap: () {
+                            /*
                             if (Constant.mapType == "inappmap") {
                               if (orderModel.status == Constant.rideActive || orderModel.status == Constant.rideInProgress) {
                                 Get.to(const LiveTrackingScreen(), arguments: {
@@ -87,6 +88,7 @@ class ActiveOrderScreen extends StatelessWidget {
                                     name: orderModel.destinationLocationName.toString());
                               }
                             }
+                            */
                           },
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
@@ -310,7 +312,7 @@ class ActiveOrderScreen extends StatelessWidget {
                                         : orderModel.status == Constant.rideActive
                                             ? ButtonThem.buildButton(
                                                 context,
-                                                title: "Iniciar viaje",
+                                                title: "Ir por el Pasajero",
                                                 btnHeight: 45,
                                                 // Te lleva a Google Maps para iniciar la navegación al punto de recogida
                                                 onPress: () async {

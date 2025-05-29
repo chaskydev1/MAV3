@@ -1,3 +1,4 @@
+/*
 import 'package:driver/constant/constant.dart';
 import 'package:driver/constant/show_toast_dialog.dart';
 import 'package:driver/controller/live_tracking_controller.dart';
@@ -22,7 +23,7 @@ class LiveTrackingScreen extends StatelessWidget {
           appBar: AppBar(
             elevation: 2,
             backgroundColor: AppColors.primary,
-            title: Text("Map view".tr),
+            title: Text("Vista del Mapa".tr),
             leading: InkWell(
                 onTap: () {
                   Get.back();
@@ -115,3 +116,4 @@ class LiveTrackingScreen extends StatelessWidget {
     );
   }
 }
+*/
