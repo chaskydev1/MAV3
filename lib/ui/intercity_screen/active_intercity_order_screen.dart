@@ -6,6 +6,7 @@ import 'package:driver/constant/show_toast_dialog.dart';
 import 'package:driver/controller/active_intercity_order_controller.dart';
 import 'package:driver/model/driver_user_model.dart';
 import 'package:driver/model/intercity_order_model.dart';
+import 'package:driver/model/wallet_transaction_model.dart';
 import 'package:driver/model/order/driverId_accept_reject.dart';
 import 'package:driver/model/user_model.dart';
 import 'package:driver/themes/app_colors.dart';
@@ -369,6 +370,40 @@ class ActiveIntercityOrderScreen extends StatelessWidget {
                 Get.back();
                 ShowToastDialog.showLoader("Por favor espera".tr);
                 orderModel.status = Constant.rideInProgress;
+
+                // Aplicar comisión de administrador al verificar el código del pasajero (intercity)
+                String? couponAmount = "0.0";
+                if (orderModel.coupon != null) {
+                  if (orderModel.coupon?.code != null) {
+                    if (orderModel.coupon!.type == "fix") {
+                      couponAmount = orderModel.coupon!.amount.toString();
+                    } else {
+                      couponAmount =
+                          ((double.parse(orderModel.finalRate.toString()) * double.parse(orderModel.coupon!.amount.toString())) / 100)
+                              .toString();
+                    }
+                  }
+                }
+
+                WalletTransactionModel adminCommissionWallet = WalletTransactionModel(
+                    id: Constant.getUuid(),
+                    amount:
+                        "-${Constant.calculateAdminCommission(amount: (double.parse(orderModel.finalRate.toString()) - double.parse(couponAmount.toString())).toString(), adminCommission: Constant.adminCommission)}",
+                    createdDate: Timestamp.now(),
+                    paymentType: "wallet".tr,
+                    transactionId: orderModel.id,
+                    orderType: "intercity",
+                    userType: "driver",
+                    userId: orderModel.driverId.toString(),
+                    note: "Comisión de administración (${Constant.adminCommission?.amount}%)".tr);
+
+                await FireStoreUtils.setWalletTransaction(adminCommissionWallet).then((value) async {
+                  if (value == true) {
+                    await FireStoreUtils.updatedDriverWallet(
+                        amount:
+                            "-${Constant.calculateAdminCommission(amount: (double.parse(orderModel.finalRate.toString()) - double.parse(couponAmount.toString())).toString(), adminCommission: Constant.adminCommission)}");
+                  }
+                });
 
                 await FireStoreUtils.getCustomer(orderModel.userId.toString()).then((value) async {
                   if (value != null) {

@@ -242,78 +242,7 @@ class OrderIntercityScreen extends StatelessWidget {
                                                       ),
                                                       const SizedBox(
                                                         height: 10,
-                                                      ),
-                                                      Visibility(
-                                                          visible:
-                                                              controller.paymentModel.value.cash!.name == orderModel.paymentType.toString() && orderModel.paymentStatus == false,
-                                                          child: ButtonThem.buildButton(
-                                                            context,
-                                                            title: "Confirm cash payment".tr,
-                                                            btnHeight: 44,
-                                                            onPress: () async {
-                                                              ShowToastDialog.showLoader("Por favor espera".tr);
-                                                              orderModel.paymentStatus = true;
-                                                              orderModel.status = Constant.rideComplete;
-                                                              orderModel.updateDate = Timestamp.now();
-
-                                                              String? couponAmount = "0.0";
-                                                              if (orderModel.coupon != null) {
-                                                                if (orderModel.coupon?.code != null) {
-                                                                  if (orderModel.coupon!.type == "fix") {
-                                                                    couponAmount = orderModel.coupon!.amount.toString();
-                                                                  } else {
-                                                                    couponAmount =
-                                                                        ((double.parse(orderModel.finalRate.toString()) * double.parse(orderModel.coupon!.amount.toString())) / 100)
-                                                                            .toString();
-                                                                  }
-                                                                }
-                                                              }
-
-                                                              // Descontar solo la comisión de administración
-                                                              WalletTransactionModel adminCommissionWallet = WalletTransactionModel(
-                                                                  id: Constant.getUuid(),
-                                                                  amount:
-                                                                      "-${Constant.calculateAdminCommission(amount: (double.parse(orderModel.finalRate.toString()) - double.parse(couponAmount.toString())).toString(), adminCommission: Constant.adminCommission)}",
-                                                                  createdDate: Timestamp.now(),
-                                                                  paymentType: "wallet".tr,
-                                                                  transactionId: orderModel.id,
-                                                                  orderType: "intercity",
-                                                                  userType: "driver",
-                                                                  userId: orderModel.driverId.toString(),
-                                                                  note: "Comisión de administración (${Constant.adminCommission?.amount}%)".tr);
-
-                                                              await FireStoreUtils.setWalletTransaction(adminCommissionWallet).then((value) async {
-                                                                if (value == true) {
-                                                                  await FireStoreUtils.updatedDriverWallet(
-                                                                      amount:
-                                                                          "-${Constant.calculateAdminCommission(amount: (double.parse(orderModel.finalRate.toString()) - double.parse(couponAmount.toString())).toString(), adminCommission: Constant.adminCommission)}");
-                                                                }
-                                                              });
-
-                                                              await FireStoreUtils.getCustomer(orderModel.userId.toString()).then((value) async {
-                                                                if (value != null) {
-                                                                  await SendNotification.sendOneNotification(
-                                                                      token: value.fcmToken.toString(),
-                                                                      title: 'Cash Payment confirmed'.tr,
-                                                                      body: 'Driver has confirmed your cash payment'.tr,
-                                                                      payload: {});
-                                                                }
-                                                              });
-
-                                                              await FireStoreUtils.getIntercityFirstOrderOrNOt(orderModel).then((value) async {
-                                                                if (value == true) {
-                                                                  await FireStoreUtils.updateIntercityReferralAmount(orderModel);
-                                                                }
-                                                              });
-
-                                                              await FireStoreUtils.setInterCityOrder(orderModel).then((value) {
-                                                                if (value == true) {
-                                                                  ShowToastDialog.closeLoader();
-                                                                  ShowToastDialog.showToast("Pago confirmado con éxito".tr);
-                                                                }
-                                                              });
-                                                            },
-                                                          ))
+                                                      )
                                                     ],
                                                   ),
                                                 ),

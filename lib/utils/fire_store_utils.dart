@@ -205,6 +205,64 @@ class FireStoreUtils {
     return driverIdAcceptReject;
   }
 
+  // Cancela una orden si el cliente no ha confirmado en el tiempo dado desde la aceptación del conductor
+  static Future<void> cancelIfCustomerNotAccepted({
+    required OrderModel orderModel,
+    required DriverIdAcceptReject driverAcceptance,
+    int minutes = 5,
+  }) async {
+    try {
+      if (orderModel.status == Constant.ridePlaced && (orderModel.driverId == null || orderModel.driverId!.isEmpty)) {
+        if (driverAcceptance.acceptedRejectTime != null) {
+          final DateTime acceptedAt = driverAcceptance.acceptedRejectTime!.toDate();
+          if (DateTime.now().difference(acceptedAt) > Duration(minutes: minutes)) {
+            await FireStoreUtils.fireStore
+                .collection(CollectionName.orders)
+                .doc(orderModel.id)
+                .update({'status': Constant.rideCanceled, 'updateDate': Timestamp.now()});
+          }
+        }
+      }
+    } catch (_) {}
+  }
+
+  // Elimina la aceptación del conductor si el cliente no confirma en X minutos:
+  // - borra el doc en subcolección acceptedDriver/{driverId}
+  // - remueve el driverId del array acceptedDriverId del pedido
+  static Future<void> removeAcceptedDriverAfterTimeout({
+    required OrderModel orderModel,
+    required DriverIdAcceptReject driverAcceptance,
+    int minutes = 2,
+  }) async {
+    try {
+      if (driverAcceptance.acceptedRejectTime == null) return;
+      final DateTime acceptedAt = driverAcceptance.acceptedRejectTime!.toDate();
+      final bool hasCustomerAssignedDriver = orderModel.driverId != null && orderModel.driverId!.isNotEmpty;
+      if (hasCustomerAssignedDriver) return; // Ya fue confirmado por el cliente
+
+      if (DateTime.now().difference(acceptedAt) > Duration(minutes: minutes)) {
+        final String orderId = orderModel.id.toString();
+        final String driverId = driverAcceptance.driverId.toString();
+
+        final DocumentReference orderRef = FireStoreUtils.fireStore.collection(CollectionName.orders).doc(orderId);
+        final WriteBatch batch = FireStoreUtils.fireStore.batch();
+
+        // 1) Eliminar doc de acceptedDriver/{driverId}
+        final DocumentReference acceptedDocRef = orderRef.collection('acceptedDriver').doc(driverId);
+        batch.delete(acceptedDocRef);
+
+        // 2) Remover driverId del array acceptedDriverId
+        batch.update(orderRef, {
+          'acceptedDriverId': FieldValue.arrayRemove([driverId])
+        });
+
+        await batch.commit();
+      }
+    } catch (e) {
+      // noop
+    }
+  }
+
   static Future<DriverIdAcceptReject?> getInterCItyAcceptedOrders(String orderId, String driverId) async {
     DriverIdAcceptReject? driverIdAcceptReject;
     await fireStore.collection(CollectionName.ordersIntercity).doc(orderId).collection("acceptedDriver").doc(driverId).get().then((value) async {
@@ -353,13 +411,15 @@ class FireStoreUtils {
     GeoFirePoint center = Geoflutterfire().point(latitude: latitude ?? 0.0, longitude: longLatitude ?? 0.0);
     Stream<List<DocumentSnapshot>> stream = Geoflutterfire()
         .collection(collectionRef: query)
-        .within(center: center, radius: double.parse(Constant.radius), field: 'position', strictMode: true);
+        .within(center: center, radius: 4.0, field: 'position', strictMode: true);
 
     stream.listen((List<DocumentSnapshot> documentList) {
       ordersList.clear();
       for (var document in documentList) {
         final data = document.data() as Map<String, dynamic>;
         OrderModel orderModel = OrderModel.fromJson(data);
+        // Auto-cancel orders older than 5 minutes that are still in Ride Placed and not accepted by any driver
+        _cancelOrderIfStale(orderModel);
         if (orderModel.acceptedDriverId != null && orderModel.acceptedDriverId!.isNotEmpty) {
           if (!orderModel.acceptedDriverId!.contains(FireStoreUtils.getCurrentUid())) {
             ordersList.add(orderModel);
@@ -374,6 +434,22 @@ class FireStoreUtils {
     yield* getNearestOrderRequestController!.stream;
   }
 
+  // Cancela automáticamente órdenes con más de 5 minutos en estado Ride Placed
+  Future<void> _cancelOrderIfStale(OrderModel orderModel) async {
+    try {
+      if (orderModel.status == Constant.ridePlaced && orderModel.createdDate != null) {
+        final DateTime created = orderModel.createdDate!.toDate();
+        final bool noDriverAccepted = orderModel.acceptedDriverId == null || orderModel.acceptedDriverId!.isEmpty;
+        if (noDriverAccepted && DateTime.now().difference(created) > const Duration(minutes: 5)) {
+          await FireStoreUtils.fireStore
+              .collection(CollectionName.orders)
+              .doc(orderModel.id)
+              .update({'status': Constant.rideCanceled, 'updateDate': Timestamp.now()});
+        }
+      }
+    } catch (_) {}
+  }
+
   StreamController<List<InterCityOrderModel>>? getNearestFreightOrderRequestController;
 
   Stream<List<InterCityOrderModel>> getFreightOrders(double? latitude, double? longLatitude) async* {
@@ -386,7 +462,7 @@ class FireStoreUtils {
     GeoFirePoint center = Geoflutterfire().point(latitude: latitude ?? 0.0, longitude: longLatitude ?? 0.0);
     Stream<List<DocumentSnapshot>> stream = Geoflutterfire()
         .collection(collectionRef: query)
-        .within(center: center, radius: double.parse(Constant.radius), field: 'position', strictMode: true);
+        .within(center: center, radius: 4.0, field: 'position', strictMode: true);
 
     stream.listen((List<DocumentSnapshot> documentList) {
       ordersList.clear();
