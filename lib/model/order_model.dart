@@ -9,6 +9,7 @@ import 'package:driver/model/service_model.dart';
 import 'package:driver/model/tax_model.dart';
 import 'package:driver/model/zone_model.dart';
 
+
 class OrderModel {
   String? sourceLocationName;
   String? destinationLocationName;
@@ -36,6 +37,7 @@ class OrderModel {
   Timestamp? createdDate;
   Timestamp? updateDate;
   Timestamp? acceptHoldTime;
+  Timestamp? scheduledDate; // ✅ NUEVO CAMPO
   bool? paymentStatus;
   bool? isAcSelected;
   List<TaxModel>? taxList;
@@ -47,41 +49,43 @@ class OrderModel {
   String? zoneId;
   VehicleInformation? vehicleInformation;
 
-  OrderModel(
-      {this.position,
-        this.serviceId,
-        this.paymentType,
-        this.sourceLocationName,
-        this.destinationLocationName,
-        this.sourceLocationLAtLng,
-        this.destinationLocationLAtLng,
-        this.id,
-        this.userId,
-        this.distance,
-        this.distanceType,
-        this.status,
-        this.driverId,
-        this.duration,
-        this.otp,
-        this.totalHoldingCharges,
-        this.acNonAcCharges,
-        this.rideHoldTimeMinutes,
-        this.rideHoldTimeMinutos,
-        this.offerRate,
-        this.finalRate,
-        this.paymentStatus,
-        this.isAcSelected,
-        this.createdDate,
-        this.updateDate,
-        this.acceptHoldTime,
-        this.taxList,
-        this.coupon,
-        this.someOneElse,
-        this.service,
-        this.adminCommission,
-        this.zone,
-        this.vehicleInformation,
-        this.zoneId});
+  OrderModel({
+    this.position,
+    this.serviceId,
+    this.paymentType,
+    this.sourceLocationName,
+    this.destinationLocationName,
+    this.sourceLocationLAtLng,
+    this.destinationLocationLAtLng,
+    this.id,
+    this.userId,
+    this.distance,
+    this.distanceType,
+    this.status,
+    this.driverId,
+    this.duration,
+    this.otp,
+    this.totalHoldingCharges,
+    this.acNonAcCharges,
+    this.rideHoldTimeMinutes,
+    this.rideHoldTimeMinutos,
+    this.offerRate,
+    this.finalRate,
+    this.paymentStatus,
+    this.isAcSelected,
+    this.createdDate,
+    this.updateDate,
+    this.acceptHoldTime,
+    this.taxList,
+    this.coupon,
+    this.someOneElse,
+    this.service,
+    this.adminCommission,
+    this.zone,
+    this.vehicleInformation,
+    this.zoneId,
+    this.scheduledDate, // ✅ en constructor
+  });
 
   OrderModel.fromJson(Map<String, dynamic> json) {
     serviceId = json['serviceId'];
@@ -94,8 +98,7 @@ class OrderModel {
     destinationLocationLAtLng = json['destinationLocationLAtLng'] != null
         ? LocationLatLng.fromJson(json['destinationLocationLAtLng'])
         : null;
-    coupon =
-    json['coupon'] != null ? CouponModel.fromJson(json['coupon']) : null;
+    coupon = json['coupon'] != null ? CouponModel.fromJson(json['coupon']) : null;
     someOneElse = json['someOneElse'] != null
         ? ContactModel.fromJson(json['someOneElse'])
         : null;
@@ -124,14 +127,31 @@ class OrderModel {
     paymentStatus = json['paymentStatus'];
     isAcSelected = json['isAcSelected'];
     position =
-    json['position'] != null ? Positions.fromJson(json['position']) : null;
+        json['position'] != null ? Positions.fromJson(json['position']) : null;
     service =
-    json['service'] != null ? ServiceModel.fromJson(json['service']) : null;
+        json['service'] != null ? ServiceModel.fromJson(json['service']) : null;
     adminCommission = json['adminCommission'] != null
         ? AdminCommission.fromJson(json['adminCommission'])
         : null;
     zone = json['zone'] != null ? ZoneModel.fromJson(json['zone']) : null;
     zoneId = json['zoneId'];
+
+    // ✅ robusto: puede venir como Timestamp, int (millis) o String
+    final sd = json['scheduledDate'];
+    if (sd is Timestamp) {
+      scheduledDate = sd;
+    } else if (sd is int) {
+      scheduledDate = Timestamp.fromMillisecondsSinceEpoch(sd);
+    } else if (sd is String) {
+      try {
+        scheduledDate = Timestamp.fromDate(DateTime.parse(sd));
+      } catch (_) {
+        scheduledDate = null;
+      }
+    } else {
+      scheduledDate = null;
+    }
+
     if (json['taxList'] != null) {
       taxList = <TaxModel>[];
       json['taxList'].forEach((v) {
@@ -188,6 +208,7 @@ class OrderModel {
     data['createdDate'] = createdDate;
     data['updateDate'] = updateDate;
     data['acceptHoldTime'] = acceptHoldTime;
+    data['scheduledDate'] = scheduledDate; // ✅ exporta el campo
     data['acceptedDriverId'] = acceptedDriverId;
     data['rejectedDriverId'] = rejectedDriverId;
     data['paymentStatus'] = paymentStatus;

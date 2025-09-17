@@ -18,7 +18,7 @@ import 'package:location/location.dart';
 
 class HomeController extends GetxController {
   RxInt selectedIndex = 0.obs;
-  List<Widget> widgetOptions = <Widget>[const NewOrderScreen(), const AcceptedOrders(), const ActiveOrderScreen(),const OrderScreen()];
+  List<Widget> widgetOptions = <Widget>[const NewOrderFreightScreen(), const AcceptedOrders(), const ActiveOrderScreen(),const OrderScreen()];
   DashBoardController dashboardController = Get.put(DashBoardController());
 
   void onItemTapped(int index) {
