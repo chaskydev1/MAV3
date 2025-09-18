@@ -152,7 +152,7 @@ class NewOrderFreightScreen extends StatelessWidget {
                       if (distance != null)
                         _chipData('Distancia',
                             '${distance.toStringAsFixed(2)} $distanceType'),
-                      if (paymentType.isNotEmpty) _chipData('Pago', paymentType),
+                      //if (paymentType.isNotEmpty) _chipData('Pago', paymentType),
                       // ID oculto por defecto; se muestra con toque al auto
                       _chipData('ID', id, hidden: true),
                     ],
