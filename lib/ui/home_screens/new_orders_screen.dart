@@ -13,8 +13,15 @@ import 'package:provider/provider.dart';
 
 import 'ride_placed_details_page.dart';
 
-class NewOrderFreightScreen extends StatelessWidget {
+class NewOrderFreightScreen extends StatefulWidget {
   const NewOrderFreightScreen({Key? key}) : super(key: key);
+
+  @override
+  State<NewOrderFreightScreen> createState() => _NewOrderFreightScreenState();
+}
+
+class _NewOrderFreightScreenState extends State<NewOrderFreightScreen> {
+  final Set<String> _processed = <String>{};
 
   String _money(num? v) {
     final sym = Constant.currencyModel?.symbol ?? '';
@@ -32,11 +39,139 @@ class NewOrderFreightScreen extends StatelessWidget {
     return '—';
   }
 
+  bool _isScheduled(Map<String, dynamic> m) {
+    final t = m['orderType']?.toString().toLowerCase();
+    return t == 'scheduled';
+  }
+
+  DateTime? _getScheduledStartLocal(Map<String, dynamic> m) {
+    final Map<String, dynamic> meta =
+        ((m['scheduledMeta'] ?? m['scheduled']) as Map?)
+                ?.cast<String, dynamic>() ??
+            const <String, dynamic>{};
+
+    final String? timeLocal = meta['timeLocal']?.toString();
+    final String? mode = meta['mode']?.toString();
+
+    final List<String>? datesLocal =
+        (meta['datesLocal'] as List?)?.cast<String>();
+    if (datesLocal != null && datesLocal.isNotEmpty) {
+      try {
+        final parts = datesLocal.first.split('-');
+        final y = int.parse(parts[0]);
+        final mo = int.parse(parts[1]);
+        final da = int.parse(parts[2]);
+        int hh = 0, mm = 0;
+        if (timeLocal != null && timeLocal.contains(':')) {
+          final t = timeLocal.split(':');
+          hh = int.tryParse(t[0]) ?? 0;
+          mm = int.tryParse(t[1]) ?? 0;
+        }
+        return DateTime(y, mo, da, hh, mm);
+      } catch (_) {}
+    }
+
+    final scheduledForLegacy = m['scheduledFor'];
+    if (scheduledForLegacy is Timestamp) {
+      return scheduledForLegacy.toDate().toLocal();
+    }
+
+    final List<dynamic> occ =
+        (meta['occurrencesUtc'] as List?) ?? const <dynamic>[];
+    if (occ.isNotEmpty && occ.first is Timestamp) {
+      return (occ.first as Timestamp).toDate().toLocal();
+    }
+
+    if (mode == 'range') {
+      final Map<String, dynamic> range =
+          (meta['range'] as Map?)?.cast<String, dynamic>() ?? const {};
+      final String? start = range['startLocal']?.toString();
+      if (start != null) {
+        try {
+          final p = start.split('-');
+          final y = int.parse(p[0]);
+          final mo = int.parse(p[1]);
+          final da = int.parse(p[2]);
+          int hh = 0, mm = 0;
+          if (timeLocal != null && timeLocal.contains(':')) {
+            final t = timeLocal.split(':');
+            hh = int.tryParse(t[0]) ?? 0;
+            mm = int.tryParse(t[1]) ?? 0;
+          }
+          return DateTime(y, mo, da, hh, mm);
+        } catch (_) {}
+      }
+    }
+
+    return null;
+  }
+
+  Future<void> _maybeAutoCancel({
+    required DocumentReference<Map<String, dynamic>> docRef,
+    required Map<String, dynamic> m,
+  }) async {
+    final docId = docRef.id;
+    if (_processed.contains(docId)) return;
+
+    try {
+      final String status = (m['status'] ?? '').toString();
+      if (status != Constant.ridePlaced) return;
+
+      final now = DateTime.now();
+      final isSched = _isScheduled(m);
+
+      if (!isSched) {
+        final created = m['createdDate'];
+        DateTime? createdAt;
+        if (created is Timestamp) createdAt = created.toDate();
+        if (createdAt != null && now.difference(createdAt).inMinutes >= 5) {
+          await docRef.update({
+            'status': Constant.rideCanceled,
+            'acceptedDriverId': <dynamic>[],
+          });
+          _processed.add(docId);
+        }
+      } else {
+        final start = _getScheduledStartLocal(m);
+        final driverId = m['driverId']?.toString() ?? '';
+        final accepted = (m['acceptedDriverId'] as List?) ?? const [];
+        final noOneAccepted = (driverId.isEmpty) &&
+            (accepted.isEmpty ||
+                accepted.every((e) => e == null || e.toString().isEmpty));
+
+        if (start != null && now.isAfter(start) && noOneAccepted) {
+          await docRef.update({
+            'status': Constant.rideCanceled,
+            'acceptedDriverId': <dynamic>[],
+          });
+          _processed.add(docId);
+        }
+      }
+    } catch (_) {}
+  }
+
+  String _headerTitleForCard(Map<String, dynamic> m) {
+    if (_isScheduled(m)) {
+      final start = _getScheduledStartLocal(m);
+      if (start != null && DateTime.now().isBefore(start)) {
+        return 'Viaje programado';
+      }
+    }
+    return 'Viaje Activo';
+  }
+
   @override
   Widget build(BuildContext context) {
     final themeChange = Provider.of<DarkThemeProvider>(context);
 
-    // 🔹 Stream del perfil del conductor para leer isOnline en tiempo real
+    // Fondo elegante
+    return Container(
+      color: const Color(0xFFF5F7FB),
+      child: _buildBody(themeChange),
+    );
+  }
+
+  Widget _buildBody(DarkThemeProvider themeChange) {
     final driverStream = FirebaseFirestore.instance
         .collection(CollectionName.driverUsers)
         .doc(FireStoreUtils.getCurrentUid())
@@ -58,7 +193,6 @@ class NewOrderFreightScreen extends StatelessWidget {
         final data = driverSnap.data?.data() ?? {};
         final bool isOnline = (data['isOnline'] ?? false) == true;
 
-        // 🔻 Si está offline, muestra el mensaje traducido
         if (!isOnline) {
           return Center(
             child: Padding(
@@ -76,12 +210,11 @@ class NewOrderFreightScreen extends StatelessWidget {
           );
         }
 
-        // ✅ Si está online, mostramos los Ride Placed como antes
         final col =
             FirebaseFirestore.instance.collection(CollectionName.orders);
 
         final stream = col
-            .where('status', isEqualTo: Constant.ridePlaced) // Ride Placed
+            .where('status', isEqualTo: Constant.ridePlaced)
             .orderBy('createdDate', descending: true)
             .limit(50)
             .snapshots();
@@ -114,18 +247,20 @@ class NewOrderFreightScreen extends StatelessWidget {
             }
 
             return ListView.separated(
-              padding: const EdgeInsets.all(10),
+              padding: const EdgeInsets.fromLTRB(14, 12, 14, 18),
               itemCount: docs.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 8),
+              separatorBuilder: (_, __) => const SizedBox(height: 12),
               itemBuilder: (context, i) {
-                final m = docs[i].data();
+                final d = docs[i];
+                final m = d.data();
 
-                final id = (m['id'] ?? docs[i].id).toString();
+                _maybeAutoCancel(docRef: d.reference, m: m);
+
+                final id = (m['id'] ?? d.id).toString();
                 final created = _fmtTs(m['createdDate']);
 
                 final src = (m['sourceLocationName'] ?? '').toString();
                 final dst = (m['destinationLocationName'] ?? '').toString();
-                final paymentType = (m['paymentType'] ?? '').toString();
 
                 final offerRate =
                     num.tryParse((m['offerRate'] ?? '0').toString());
@@ -134,26 +269,25 @@ class NewOrderFreightScreen extends StatelessWidget {
                 final distanceType =
                     (m['distanceType'] ?? Constant.distanceType).toString();
 
+                final titleText = _headerTitleForCard(m);
+
                 return InkWell(
                   onTap: () {
-                    // Navega a la página de detalles (NO muestra ID)
                     Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (_) => RidePlacedDetailsPage(order: m),
                       ),
                     );
                   },
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(16),
                   child: _RidePlacedCard(
-                    themeChange: themeChange,
                     titleRight: created,
+                    titleText: titleText,
                     chips: [
                       _chipData('Tarifa', _money(offerRate)),
                       if (distance != null)
                         _chipData('Distancia',
                             '${distance.toStringAsFixed(2)} $distanceType'),
-                      //if (paymentType.isNotEmpty) _chipData('Pago', paymentType),
-                      // ID oculto por defecto; se muestra con toque al auto
                       _chipData('ID', id, hidden: true),
                     ],
                     src: src,
@@ -172,16 +306,16 @@ class NewOrderFreightScreen extends StatelessWidget {
 /* ------------ Card + chips + easter-egg (ID) ------------- */
 
 class _RidePlacedCard extends StatefulWidget {
-  final DarkThemeProvider themeChange;
   final String titleRight;
+  final String titleText;
   final List<_ChipData> chips;
   final String src;
   final String dst;
 
   const _RidePlacedCard({
     Key? key,
-    required this.themeChange,
     required this.titleRight,
+    required this.titleText,
     required this.chips,
     required this.src,
     required this.dst,
@@ -216,85 +350,107 @@ class _RidePlacedCardState extends State<_RidePlacedCard> {
 
   @override
   Widget build(BuildContext context) {
-    final themeChange = widget.themeChange;
-
     return Stack(
       children: [
+        // CARD
         Container(
           decoration: BoxDecoration(
-            color: themeChange.getThem()
-                ? AppColors.darkContainerBackground
-                : AppColors.containerBackground,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: themeChange.getThem()
-                  ? AppColors.darkContainerBorder
-                  : AppColors.containerBorder,
-              width: 0.5,
-            ),
-            boxShadow: themeChange.getThem()
-                ? null
-                : [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.06),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFFE9EDF4), width: 1),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x1A0F172A), // sombra muy sutil
+                blurRadius: 14,
+                offset: Offset(0, 6),
+              ),
+            ],
           ),
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(12, 12, 12, 14),
+            padding: const EdgeInsets.fromLTRB(14, 14, 14, 16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Header
                 Row(
                   children: [
-                    const Icon(Icons.receipt_long, size: 18),
-                    const SizedBox(width: 8),
-                    Expanded(
+                    // Badge/pill
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE8F5E9), // verde claro
+                        borderRadius: BorderRadius.circular(999),
+                        border: Border.all(color: Colors.green.shade200),
+                      ),
                       child: Text(
-                        'Viaje Activo',
+                        widget.titleText,
                         style: GoogleFonts.poppins(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.green.shade800,
+                          fontSize: 12,
                         ),
                       ),
                     ),
-                    Text(
-                      widget.titleRight,
-                      style: GoogleFonts.poppins(
-                        fontSize: 12,
-                        color: Colors.black54,
-                      ),
+                    const Spacer(),
+                    Row(
+                      children: [
+                        const Icon(Icons.access_time,
+                            size: 14, color: Colors.black45),
+                        const SizedBox(width: 4),
+                        Text(
+                          widget.titleRight,
+                          style: GoogleFonts.poppins(
+                            fontSize: 12,
+                            color: Colors.black54,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
 
-                // Chips (si _showId es true, también muestra el chip del ID)
+                const SizedBox(height: 12),
+
+                // Chips fila
                 Wrap(
                   spacing: 8,
-                  runSpacing: 6,
+                  runSpacing: 8,
                   children: widget.chips
                       .where((c) => !c.hidden || _showId)
                       .map(_buildChip)
                       .toList(),
                 ),
 
+                const SizedBox(height: 14),
+                const Divider(height: 1, color: Color(0xFFE9EDF4)),
                 const SizedBox(height: 12),
 
-                _rowIconText(Icons.radio_button_checked,
-                    widget.src.isEmpty ? '—' : widget.src),
-                const SizedBox(height: 6),
+                // Origen
                 _rowIconText(
-                    Icons.location_on, widget.dst.isEmpty ? '—' : widget.dst),
+                  icon: Icons.radio_button_checked,
+                  iconBg: const Color(0xFFEFF6FF),
+                  iconColor: const Color(0xFF2563EB),
+                  label: 'Origen',
+                  text: widget.src.isEmpty ? '—' : widget.src,
+                ),
+                const SizedBox(height: 10),
+
+                // Destino
+                _rowIconText(
+                  icon: Icons.location_on,
+                  iconBg: const Color(0xFFFFF1F2),
+                  iconColor: const Color(0xFFDC2626),
+                  label: 'Destino',
+                  text: widget.dst.isEmpty ? '—' : widget.dst,
+                ),
               ],
             ),
           ),
         ),
 
-        // Ícono auto (easter-egg: 4 taps muestra ID 5s)
+        // Action (Easter Egg ID)
         Positioned(
           top: 6,
           right: 6,
@@ -319,29 +475,68 @@ class _RidePlacedCardState extends State<_RidePlacedCard> {
   }
 
   Widget _buildChip(_ChipData c) {
+    // Pills elegantes
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.grey.withOpacity(0.20),
-        borderRadius: BorderRadius.circular(8),
+        color: const Color(0xFFE8F5E9),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: Colors.green.shade200),
       ),
       child: Text(
         '${c.label}: ${c.value}',
-        style: GoogleFonts.poppins(fontSize: 12),
+        style: GoogleFonts.poppins(
+          fontSize: 12,
+          fontWeight: FontWeight.w700,
+          color: Colors.green.shade800,
+        ),
       ),
     );
   }
 
-  Widget _rowIconText(IconData icon, String text) {
+  Widget _rowIconText({
+    required IconData icon,
+    required Color iconBg,
+    required Color iconColor,
+    required String label,
+    required String text,
+  }) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 18, color: Colors.black54),
-        const SizedBox(width: 8),
+        // Icono redondo
+        Container(
+          width: 34,
+          height: 34,
+          decoration: BoxDecoration(
+            color: iconBg,
+            shape: BoxShape.circle,
+          ),
+          child: Icon(icon, size: 18, color: iconColor),
+        ),
+        const SizedBox(width: 10),
+        // Texto
         Expanded(
-          child: Text(
-            text,
-            style: GoogleFonts.poppins(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: GoogleFonts.poppins(
+                  color: Colors.black54,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 12,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                text,
+                style: GoogleFonts.poppins(
+                  color: Colors.black,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
           ),
         ),
       ],
@@ -358,8 +553,6 @@ class _ChipData {
 
 _ChipData _chipData(String l, String v, {bool hidden = false}) =>
     _ChipData(l, v, hidden: hidden);
-
-/* ------------ Vistas auxiliares ------------- */
 
 class _DiagEmpty extends StatelessWidget {
   final String title;
@@ -402,3 +595,4 @@ class _DiagEmpty extends StatelessWidget {
     );
   }
 }
+    

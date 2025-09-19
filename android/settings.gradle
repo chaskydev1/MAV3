@@ -20,14 +20,14 @@ pluginManagement {
 plugins {
     id "dev.flutter.flutter-plugin-loader" version "1.0.0"
     // ✅ Unifica versiones del Android Gradle Plugin
-    id "com.android.application" version "8.4.2" apply false
-    id "com.android.library"    version "8.4.2" apply false
+    id "com.android.application" version "8.7.2" apply false
+    id "com.android.library"    version "8.7.2" apply false
 
     // FlutterFire está bien
     id "com.google.gms.google-services" version "4.4.2" apply false
 
     // ✅ Sube Kotlin
-    id "org.jetbrains.kotlin.android" version "1.9.24" apply false
+    id "org.jetbrains.kotlin.android" version "2.2.0" apply false
 }
 
 include ":app"
